@@ -125,7 +125,21 @@ app.get('/messages', async (req, res) => {
 
 app.post('/status', async (req, res) => {
   const {user} = req.headers;
-  
+
+  try {
+    const {error} = userSchema.validate({user}, {abortEarly: false});
+    if (error) return res.status(422).json({ status: 422, message: error.details.map((detail) => detail.message)});
+
+    const userOnline = await db.collection('users').findOne({name: user});
+    if (!userOnline) return res.status(404).json({ status: 404, message: "Usuário não está logado" });
+    
+    await db.collection('users').updateOne({name: user}, {$set: {lastStatus: Date.now()}});
+    res.status(200).json({ status: 200, message: "OK" });
+
+  } catch (error) {
+    res.status(500);
+    //mongoClient.close();
+  }
 })
 
 setInterval(() => {
