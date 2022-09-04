@@ -104,6 +104,7 @@ app.get('/messages', async (req, res) => {
 
   if(!req.query.limit) limit = null
   else limit = parseInt(req.query.limit);
+  console.log(limit);
 
   try {
     const {error} = userSchema.validate({user}, {abortEarly: false});
@@ -116,6 +117,8 @@ app.get('/messages', async (req, res) => {
         {from: user}
       ]
     }).toArray();
+    if (limit) res.send(messages.slice(-limit));
+
     res.send(messages);
   } catch (error) {
     res.status(500);
